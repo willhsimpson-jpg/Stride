@@ -413,23 +413,23 @@ const L = (m, h) => ({kind: 'long', min: m, hmp: h || 0});
 const W = (sub, o) => Object.assign({kind: 'work', sub}, o);
 const ONE = MI;
 const PLAN = [
-  {phase:'Base', cut:1, ck:1, runs:{Mon:E(40), Tue:E(40), Thu:E(45), Sat:L(70)}},
+  {phase:'Base', cut:1, runs:{Mon:E(40), Tue:E(40), Thu:E(45), Sat:L(70)}},
   {phase:'Base', runs:{Mon:E(50), Tue:E(50), Thu:W('cv',{reps:3,m:800,rest:120}), Sat:L(90)}},
   {phase:'Base', runs:{Mon:E(55), Tue:E(55), Thu:W('tempo',{mi:4}), Sat:L(95)}},
   {phase:'Base', runs:{Mon:E(55), Tue:E(55), Thu:W('big',{reps:2,m:3000,rest:300}), Sat:L(100)}},
-  {phase:'Build', cut:1, ck:1, runs:{Mon:E(50), Tue:E(50), Thu:E(45), Sat:L(80)}},
+  {phase:'Build', cut:1, runs:{Mon:E(50), Tue:E(50), Thu:E(45), Sat:L(80)}},
   {phase:'Build', runs:{Mon:E(60), Tue:E(60), Thu:W('subt',{reps:4,m:ONE,rest:90}), Sat:L(105)}},
   {phase:'Build', runs:{Mon:E(60), Tue:E(60), Thu:W('speed',{reps:5,m:400,rest:80,x:2}), Sat:L(110)}},
   {phase:'Build', runs:{Mon:E(60), Tue:E(60), Thu:W('thr',{reps:5,m:1000,rest:75}), Sat:L(115)}},
-  {phase:'Build', cut:1, ck:1, runs:{Mon:E(50), Tue:E(50), Thu:E(45), Sat:L(90)}},
+  {phase:'Build', cut:1, runs:{Mon:E(50), Tue:E(50), Thu:E(45), Sat:L(90)}},
   {phase:'Build', runs:{Mon:E(60), Tue:E(60), Thu:W('cv',{reps:4,m:800,rest:120}), Sat:L(120)}},
   {phase:'Build', runs:{Mon:E(60), Tue:E(60), Thu:W('tempo',{mi:6}), Sat:L(120)}},
   {phase:'Build', runs:{Mon:E(60), Tue:E(60), Thu:W('big',{reps:2,m:4000,rest:300}), Sat:L(120)}},
-  {phase:'Sharpen', cut:1, ck:1, runs:{Mon:E(50), Tue:E(50), Thu:E(45), Sat:L(90)}},
+  {phase:'Sharpen', cut:1, runs:{Mon:E(50), Tue:E(50), Thu:E(45), Sat:L(90)}},
   {phase:'Sharpen', runs:{Mon:E(60), Tue:E(60), Thu:W('subt',{reps:5,m:ONE,rest:90}), Sat:L(120)}},
   {phase:'Sharpen', runs:{Mon:E(60), Tue:E(60), Thu:W('speed',{reps:7,m:400,rest:80,x:3}), Sat:L(120)}},
   {phase:'Sharpen', runs:{Mon:E(60), Tue:E(60), Thu:W('thr',{reps:7,m:1000,rest:75}), Sat:L(120)}},
-  {phase:'Sharpen', cut:1, ck:1, runs:{Mon:E(50), Tue:E(50), Thu:E(45), Sat:L(90)}},
+  {phase:'Sharpen', cut:1, runs:{Mon:E(50), Tue:E(50), Thu:E(45), Sat:L(90)}},
   {phase:'Race build', runs:{Mon:E(60), Tue:E(60), Thu:W('cv',{reps:5,m:800,rest:120}), Sat:L(120,20)}},
   {phase:'Race build', runs:{Mon:E(60), Tue:E(60), Thu:W('tempo',{mi:7.5}), Sat:L(120,30)}},
   {phase:'Taper', taper:1, runs:{Mon:E(45), Tue:E(45), Thu:W('hmp',{reps:3,m:ONE,rest:120}), Sat:L(80)}},
@@ -438,13 +438,13 @@ const PLAN = [
 PLAN.forEach((w, i) => { w.n = i + 1; w.start = START + i * 7 * DAY; w.end = w.start + 6 * DAY; });
 const NW = PLAN.length, TAPER0 = PLAN[19].start;
 const NOTE = {
-  1: 'Cutback week to absorb the last block. Zone 2 checkpoint: run 30 minutes holding your zone 2 heart rate, then log the pace below.',
+  1: 'Cutback week to absorb the last block before the build starts.',
   18: 'Race build. The long run finishes with 20 minutes at half marathon goal pace.',
   19: 'Race build peak. The long run finishes with 30 minutes at goal pace. Treat it as a dress rehearsal: race shoes, breakfast, fueling.',
   20: 'Taper, week 1 of 2. Running volume drops by about a third. Keep the goal-pace miles smooth, not hard.',
   21: 'Taper, week 2 of 2. Race on Saturday, April 3. No Friday run. Thursday is a short opener to keep your legs awake.',
 };
-[5, 9, 13, 17].forEach(n => NOTE[n] = 'Cutback week. Zone 2 checkpoint: run 30 minutes holding your zone 2 heart rate, then log the pace below.');
+[5, 9, 13, 17].forEach(n => NOTE[n] = 'Cutback week. Lighter running so your body can absorb the last three weeks of work.');
 const STR_NOTE = {
   20: 'Taper week: 1 to 2 sets per exercise and nothing to failure. Skip heavy back squats and stiff-legged deadlifts.',
   21: 'Race week: keep sessions light and finish legs by Wednesday. Skip the back squat test.',
@@ -590,10 +590,6 @@ function loggedRuns(S) {
     if (!runDone(g)) return;
     out.push({src:'p', id: p.id, n: p.n, date: p.date, kind: p.run.kind, sub: p.run.sub, spec: p.run, dist: +g.dist || 0, pace: +g.pace || 0, hr: +g.hr || 0, rep: +g.rep || 0, tm: !!g.tm, hmp: p.run.hmp || 0});
   });
-  Object.keys(S.ck || {}).forEach(k => {
-    const c = S.ck[k], n = +k;
-    if (c && c.pace && PLAN[n - 1]) out.push({src:'ck', n, date: PLAN[n - 1].start + 4 * DAY, kind:'ck', pace: +c.pace, hr: +c.hr || 0, dist: 0});
-  });
   return out;
 }
 function kal(x, P, z, sig) {
@@ -618,19 +614,19 @@ function buildModel(S, today) {
   const cMemo = {};
   const cAt = t => cMemo[t] != null ? cMemo[t] : (cMemo[t] = consistencyAt(S, t));
   function apply(r) {
-    const zKind = r.kind === 'easy' || r.kind === 'ck' || (r.kind === 'long' && !r.hmp);
+    const zKind = r.kind === 'easy' || (r.kind === 'long' && !r.hmp);
     if (zKind && !r.tm && r.pace > 0) {
       let sp = MI / r.pace, sig, dHR = 0;
       if (r.hr > 0) {
-        const dur = r.dist > 0 ? r.dist * r.pace / 60 : (r.kind === 'ck' ? 30 : 45);
+        const dur = r.dist > 0 ? r.dist * r.pace / 60 : 45;
         const hrA = r.hr - 0.05 * Math.max(0, dur - 45); // allow for cardiac drift on longer runs
         dHR = clamp(hrA - hrRef, -12, 12);
         sp = sp / (1 + HR_BETA * dHR);
-        sig = r.kind === 'ck' ? 0.015 : r.kind === 'long' ? 0.035 : 0.03;
-      } else sig = r.kind === 'ck' ? 0.02 : 0.06;
+        sig = r.kind === 'long' ? 0.035 : 0.03;
+      } else sig = 0.06;
       [y, Q] = kal(y, Q, Math.log(sp), sig);
       zObs.push({t: r.date, norm: MI / sp, raw: r.pace, hr: r.hr, kind: r.kind});
-      if (r.hr > 0 || r.kind === 'ck') { // weak link: aerobic fitness nudges overall fitness
+      if (r.hr > 0) { // weak link: aerobic fitness nudges overall fitness
         const Vz = vdotFromT(z2Of({y}) / R);
         if (isFinite(Vz)) [V, P] = kal(V, P, Vz, 3.0);
       }
@@ -1101,14 +1097,6 @@ function runItem(p) {
     <button class="chk" data-act="done" data-id="${p.id}" aria-pressed="${P.done}" aria-label="Mark ${DAYL[p.day]} run as done">${IC.check}</button>
     <div class="rc"><div class="rtop" data-p="head">${P.head}</div><ul class="rlines" data-p="lines">${P.lines}</ul>${log}<div class="prog" data-p="prog">${P.prog}</div></div></div>`;
 }
-function ckItem(n) {
-  const c = S.ck[n] || {}, a = k => `data-ck="${n}" data-f="${k}"`;
-  return `<div class="run${c.pace ? ' done' : ''}" data-ckc="${n}"><div class="chk" aria-hidden="true">${IC.check}</div>
-    <div class="rc"><div class="rtop"><div><div class="rday">Any easy day this week</div><h3>Zone 2 checkpoint</h3></div></div>
-    <ul class="rlines"><li>Run 30 min holding about <strong>${M.hrRef} bpm</strong>, then log the average pace. It is the cleanest read on your aerobic fitness, so it counts extra in your paces.</li></ul>
-    <div class="log four">${fld(a('pace'), 'Avg pace /mi', c.pace ? mmss(c.pace) : '', mmss(z2Of(M.estFor(n))), 'numeric')}${fld(a('hr'), 'Avg HR', c.hr || '', String(M.hrRef), 'numeric')}</div>
-    <div class="prog"><span>Optional, not scored</span></div></div></div>`;
-}
 function wstatsHTML() {
   const rs = RS(sel);
   return `<div class="stat"><span>Planned</span><b>${fp(rs.planned)} mi</b></div><div class="stat"><span>Logged</span><b>${fp(rs.doneMi)} mi</b></div><div class="stat"><span>Running</span><b>${fp(rs.earned)} / 50</b></div>`;
@@ -1132,7 +1120,7 @@ function planInfo() {
 }
 function runView() {
   return `<section class="sec" style="margin-top:14px"><div class="zones" id="zones">${zonesHTML()}</div><p class="adapt" id="adapt">${adaptHTML()}</p>${noteHTML()}</section>
-    <section class="sec"><h2>Runs</h2><div class="runs" id="runs">${SLOTS.map(d => runItem(PRUN['w' + sel + '-' + d])).join('')}${PLAN[sel - 1].ck ? ckItem(sel) : ''}</div>
+    <section class="sec"><h2>Runs</h2><div class="runs" id="runs">${SLOTS.map(d => runItem(PRUN['w' + sel + '-' + d])).join('')}</div>
     <div class="stats3" id="wstats">${wstatsHTML()}</div></section>
     <section class="sec"><h2>Season</h2><p class="sub">Bar height is planned miles. The fill is your weekly score.</p><div class="season" id="season">${seasonHTML()}</div>
     <div class="axis"><span>Nov 8</span><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span><span>Race</span></div>${planInfo()}</section>`;
@@ -1149,8 +1137,6 @@ function patchRun() {
     el.querySelector('[data-p=prog]').innerHTML = P.prog;
     el.querySelector('.chk').setAttribute('aria-pressed', String(P.done));
   });
-  const ck = $('#runs [data-ckc]');
-  if (ck) ck.classList.toggle('done', !!(S.ck[sel] && S.ck[sel].pace));
   $('#wstats').innerHTML = wstatsHTML();
   $('#season').innerHTML = seasonHTML();
 }
@@ -1178,20 +1164,6 @@ function commitRun(el) {
   if (f === 'dist' && v > 0 && !g.done) { g.done = true; g.snap = snapFor(id); }
   S.runs[id] = g;
   el.value = v == null ? '' : (f === 'pace' || f === 'rep') ? mmss(v) : String(v);
-  soft();
-}
-function commitCk(el) {
-  const n = +el.dataset.ck, f = el.dataset.f, raw = el.value.trim();
-  let v = null;
-  if (raw !== '') {
-    if (f === 'pace') { v = parsePace(raw); if (!(v >= 240 && v <= 1500)) return bad(el, 'Use minutes and seconds per mile, like 9:45'); }
-    else { v = parseInt(raw, 10); if (!(v >= 60 && v <= 230)) return bad(el, 'Enter an average heart rate from 60 to 230'); }
-  }
-  el.classList.remove('bad');
-  const c = Object.assign({}, S.ck[n]);
-  if (v == null) delete c[f]; else c[f] = v;
-  if (Object.keys(c).length) S.ck[n] = c; else delete S.ck[n];
-  el.value = v == null ? '' : f === 'pace' ? mmss(v) : String(v);
   soft();
 }
 /* ---------- Strength tab ---------- */
@@ -1541,7 +1513,7 @@ function anaRun() {
   ser.forEach(r => { const i = r.n + 4; band[i] = [r.z2.lo, r.z2.hi]; if (r.past) past[i] = r.z2.v; else fut[i] = r.z2.v; });
   const lp = ser.filter(r => r.past).pop();
   if (lp) fut[lp.n + 4] = lp.z2.v; else { const i0 = clamp(Math.round(idx(TODAY)), 0, N - 1); if (fut[i0] == null) fut[i0] = z2Of(M.now); }
-  const zDots = M.zObs.map(o => ({x: idx(o.t), v: o.norm, c: o.kind === 'ck' ? 'var(--mob)' : 'var(--run)'}));
+  const zDots = M.zObs.map(o => ({x: idx(o.t), v: o.norm, c: 'var(--run)'}));
   const zChart = lineSVG({label: 'Zone 2 pace trend', n: N, invert: true, fmt: v => mmss(v), mark: idx(TODAY), labels: i => ({0: 'Oct 11', 4: 'Nov 8', 12: 'Jan 3', 20: 'Feb 28', 25: 'Apr 3'})[i] || '',
     series: [{v: past, c: 'var(--run)', band}, {v: fut, c: 'var(--run)', dash: true}], dots: zDots});
   /* efficiency: meters per heartbeat on outdoor easy and long runs */
@@ -1563,7 +1535,7 @@ function anaRun() {
   const logTbl = fl.length ? tbl(['Date', 'Week', 'Run', 'Planned', 'Miles', '% plan', 'Pace', 'Time', 'HR', 'Rep pace', 'Points'], fl.map(r => `<tr class="${r.pre ? 'pre' : ''}"><td>${fmtD(r.date)}</td><td>${r.wk}</td><td class="l">${esc(r.title)}${r.tm ? '<span class="tmk">treadmill</span>' : ''}</td><td>${r.planned ? r.planned.toFixed(1) : '—'}</td><td>${r.dist ? r.dist.toFixed(2) : '—'}</td><td>${r.comp ? Math.round(r.comp * 100) + '%' : '—'}</td><td>${r.pace ? mmss(r.pace) : '—'}</td><td>${r.dist && r.pace ? hms(r.dist * r.pace) : '—'}</td><td>${dash(r.hr)}</td><td>${r.rep ? mmss(r.rep) : '—'}</td><td>${r.pts != null ? fp(r.pts) + '/' + r.max : '—'}</td></tr>`), ['', '', 'l']) : empty('No runs match this filter yet.');
   const wTbl = tbl(['Week', 'Dates', 'Planned', 'Logged', 'Done', 'Runs', 'Easy pace', 'Easy HR', 'Long', 'Time', 'Points'], wr.map(r => `<tr><td>Week ${r.w.n}</td><td>${fmtRange(r.w.start, r.w.end)}</td><td>${fp(r.rs.planned)}</td><td>${fp(r.rs.doneMi)}</td><td>${r.w.start > TODAY ? '—' : Math.round(r.rs.earned / 50 * 100) + '%'}</td><td>${r.runs}/4</td><td>${r.eP ? mmss(r.eP) : '—'}</td><td>${r.eH ? Math.round(r.eH) : '—'}</td><td>${r.longMi ? r.longMi.toFixed(1) : '—'}</td><td>${r.time ? fmtMin(r.time) : '—'}</td><td>${fp(r.rs.earned)}</td></tr>`));
   return kp + `<section class="sec"><h2>Weekly miles</h2><div class="panel">${mileChart}<div class="leg2"><span><i style="background:var(--run)"></i>Logged</span><span><i style="background:var(--sf3)"></i>Planned</span><span><i style="background:var(--fa)"></i>Before the plan</span></div></div></section>
-    <section class="sec"><h2>Zone 2 pace</h2><p class="sub">Each dot is a run's pace adjusted to ${M.hrRef} bpm. Higher on the chart is faster. Dashed is the projection, shading is the likely range.</p><div class="panel">${zChart}<div class="leg2"><span><i style="background:var(--run)"></i>Easy and long runs</span><span><i style="background:var(--mob)"></i>Checkpoints</span></div></div></section>
+    <section class="sec"><h2>Zone 2 pace</h2><p class="sub">Each dot is a run's pace adjusted to ${M.hrRef} bpm. Higher on the chart is faster. Dashed is the projection, shading is the likely range.</p><div class="panel">${zChart}<div class="leg2"><span><i style="background:var(--run)"></i>Outdoor easy and long runs</span></div></div></section>
     ${effChart ? `<section class="sec"><h2>Running economy</h2><p class="sub">Meters covered per heartbeat on outdoor easy and long runs. A rising line means more speed for the same effort.</p><div class="panel">${effChart}</div></section>` : ''}
     <section class="sec"><h2>Workouts</h2><p class="sub">Your hard-rep pace against the target that week. Negative is faster than target.</p>${wkTbl}</section>
     <section class="sec"><div class="tblbar"><h2 class="h2" style="margin:0">Run log</h2>${csvBtn('runs')}</div><div class="chips" role="group" aria-label="Filter runs">${F.map(([k, l]) => `<button class="chip" data-act="rf" data-f="${k}" aria-pressed="${f === k}">${l}</button>`).join('')}</div>${logTbl}</section>
@@ -1693,7 +1665,7 @@ function predSeries(m) {
     const rows = ser.map(r => {
       let actual = null;
       if (m === 'hm' && r.n === NW && runDone(rr) && +rr.pace > 0) actual = rr.pace * HM / MI;
-      if (m === 'z2' && PLAN[r.n - 1].ck && S.ck[r.n] && S.ck[r.n].pace) actual = S.ck[r.n].pace;
+      if (m === 'z2') { const w = PLAN[r.n - 1], z = M.zObs.filter(o => o.t >= w.start && o.t <= w.end); if (z.length) actual = avg(z.map(o => o.norm)); }
       return {n: r.n, past: r.past, pred: r[m], actual};
     });
     const fmt = m === 'z2' ? (v => mmss(v) + ' /mi') : hms;
@@ -1748,7 +1720,7 @@ function predView() {
     const eta = nextLevelEta(S, P.T);
     if (eta) extra = `<p class="sub" style="margin:10px 2px 0">${eta.n ? `On this trend you should clear 5 × ${P.T.kind === 'time' ? mmss(eta.goal) : eta.goal} around week ${eta.n} (${fmtRange(PLAN[eta.n - 1].start, PLAN[eta.n - 1].end)}).` : `Clearing 5 × ${P.T.kind === 'time' ? mmss(eta.goal) : eta.goal} isn't on the current trend before race day.`}</p>`;
   }
-  const what = {hm: 'Half marathon time if you raced that week. Race week includes the taper.', '10k': '10K time if you raced that week on fresh legs.', '5k': '5K time if you raced that week on fresh legs.', mile: 'Mile time if you raced that week on fresh legs.', z2: 'Your pace at your zone 2 heart rate.'}[m] || `Your ${P.label} on test day.`;
+  const what = {hm: 'Half marathon time if you raced that week. Race week includes the taper.', '10k': '10K time if you raced that week on fresh legs.', '5k': '5K time if you raced that week on fresh legs.', mile: 'Mile time if you raced that week on fresh legs.', z2: 'Your pace at your zone 2 heart rate. Logged values are that week’s average, adjusted to your zone 2 heart rate.'}[m] || `Your ${P.label} on test day.`;
   return `<section class="sec" style="margin-top:14px">${bib}</section>
     <section class="sec"><details style="border-top:0;margin-top:0"><summary style="padding-top:0">Race-day pacing plan</summary>${splitsHTML(tgt)}</details></section>
     <section class="sec" style="margin-top:8px"><h2>Fitness now</h2>${fit}</section>
@@ -1758,7 +1730,7 @@ function predView() {
 function methodHTML() {
   return `<details><summary>How the predictions work</summary><div class="prose">
     <p><b>Two fitness estimates.</b> Your zone 2 pace and your running fitness are each updated after every logged run with a Kalman filter: each run moves the estimate by an amount that depends on how reliable that kind of run is, and older runs fade as new ones arrive.</p>
-    <p><b>Zone 2 pace</b> uses outdoor easy and long runs. Each pace is adjusted to your zone 2 heart rate at 0.6% speed per beat, with an allowance for heart-rate drift on runs over 45 minutes. Checkpoints count most. Treadmill runs are left out because their pace and heart rate don't match outdoor running.</p>
+    <p><b>Zone 2 pace</b> uses outdoor easy and long runs. Each pace is adjusted to your zone 2 heart rate at 0.6% speed per beat, with an allowance for heart-rate drift on runs over 45 minutes. Treadmill runs are left out because their pace and heart rate don't match outdoor running.</p>
     <p><b>Running fitness</b> is a VDOT score from the Daniels and Gilbert equations. It comes mainly from your hard-rep paces: threshold reps are read as 1-hour race effort, critical velocity as 30-minute race effort, speed reps as mile race pace, and tempo or sub-threshold work as slightly slower than threshold. Zone 2 pace nudges it a little. A logged race counts most.</p>
     <p><b>Looking ahead.</b> Fitness is projected to improve by up to 0.18 VDOT a week, slowing over time and scaled by how much of your planned running you completed in the last 4 weeks. Nothing is added during the taper. Race day gets a 1.5% taper boost, plus a small slowdown if your long runs stay under about 11 miles. Race times come from VDOT with the same equations. Ranges are 80% intervals that widen further out.</p>
     <p><b>Strength.</b> Bench and back squat use estimated 1-rep max from your best top set (Epley formula). Rep tests use total reps over five sets; pull-ups are adjusted for assistance when your bodyweight is set. Each trend is a recency-weighted fit on a log scale, blended with typical progress rates until you have several tests, and it slows over time.</p>
@@ -1822,10 +1794,6 @@ function importOld(o) {
       if (isDone && !cur.done) { cur.done = true; cur.snap = snapFor(p.id); }
       if (Object.keys(cur).length) { S.runs[p.id] = cur; np++; }
     }
-  });
-  Object.keys(log).forEach(k => {
-    const n = +k - 3, L0 = log[k];
-    if (n >= 1 && n <= NW && L0 && PLAN[n - 1].ck) { const pc = parsePace(L0.pace); if (pc > 0) S.ck[n] = {pace: pc, hr: parseInt(L0.hr, 10) || null}; }
   });
   hist.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
   S.hist = hist;
@@ -1912,7 +1880,6 @@ document.addEventListener('change', e => {
   if (el.matches('input[data-run]')) commitRun(el);
   else if (el.matches('input[data-tf]')) commitTest(el);
   else if (el.matches('input[data-smin]')) commitMin(el);
-  else if (el.matches('input[data-ck]')) commitCk(el);
   else if (el.id === 'setHr') setHr(el);
   else if (el.id === 'setBw') setBw(el);
   else if (el.id === 'bkfile') fileRestore(el);
